@@ -19,7 +19,7 @@ const Home: NextPage = () => {
             <div className="container">
               <div className="row">
                 <div className="col-md-12 text-center">
-                  <h1>Explore</h1>
+                  <h1>Home</h1>
                 </div>
                 <div className="clearfix" />
               </div>

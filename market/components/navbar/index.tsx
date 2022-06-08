@@ -1,11 +1,53 @@
 import Home from "../../pages/index";
 import Link from "next/link";
+import { useRouter } from "../../node_modules/next/router";
 
 const navigation = [
   { name: "Home", href: "/", curent: true },
   { name: "Create", href: "/nft/create", curent: false },
+  {
+    name: "Profile",
+    href: "/profile",
+    curent: false,
+    children: [
+      { name: "Show Profile", href: "/profile", curent: false },
+      { name: "Update Profile", href: "/profile/update", curent: false },
+    ],
+  },
 ];
 
+const renderLink = (item) => {
+  if (item.children) {
+    return (
+      <li key={item.name}>
+        <a>
+          {item.name}
+          <span />
+        </a>
+        <ul>
+          {item.children.map((child) => (
+            <li>
+              <Link key={child.name} href={child.href}>
+                <a href="03_grey-index.html">{child.name}</a>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </li>
+    );
+  } else {
+    return (
+      <li key={item.name}>
+        <Link key={item.name} href={item.href}>
+          <a>
+            {item.name}
+            <span />
+          </a>
+        </Link>
+      </li>
+    );
+  }
+};
 export default function Navbar() {
   return (
     <>
@@ -34,16 +76,7 @@ export default function Navbar() {
                 </div>
                 <div className="de-flex-col header-col-mid">
                   <ul id="mainmenu">
-                    {navigation.map((item) => (
-                      <li key={item.name}>
-                        <Link key={item.name} href={item.href}>
-                        <a>
-                        {item.name}
-                          <span />
-                        </a>
-                        </Link>
-                      </li>
-                    ))}
+                    {navigation.map((item) => renderLink(item))}
                   </ul>
                   <div className="menu_side_area">
                     <a href="02_dark-wallet.html" className="btn-main">

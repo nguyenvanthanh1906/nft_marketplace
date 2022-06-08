@@ -16,7 +16,7 @@ const NftCreate: NextPage = () => {
             <div className="container">
               <div className="row">
                 <div className="col-md-12 text-center">
-                  <h1>Create Single Collectible</h1>
+                  <h1>Create Collectible</h1>
                 </div>
                 <div className="clearfix" />
               </div>
