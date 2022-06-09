@@ -11,11 +11,14 @@ import "../styles/css/style.css";
 import "../styles/css/coloring.css";
 import "../styles/css/colors/scheme-01.css";
 import React from "react";
+import { Web3Provider } from "@providers";
 
 function MyApp({ Component, pageProps }) {
   return (
     <>
-      <Component {...pageProps} />
+      <Web3Provider>
+        <Component {...pageProps} />
+      </Web3Provider>
       <script src="../js/jquery.min.js"></script>
       <script src="../js/bootstrap.min.js"></script>
       <script src="../js/bootstrap.bundle.min.js"></script>
