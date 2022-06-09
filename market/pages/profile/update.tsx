@@ -1,5 +1,5 @@
 import type { NextPage } from "next";
-import { BaseLayout } from "../../components/index";
+import { BaseLayout } from "../../components/ui/index";
 
 const UpdateProfile: NextPage = () => {
   return (

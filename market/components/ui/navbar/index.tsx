@@ -19,14 +19,14 @@ const navigation = [
 const renderLink = (item) => {
   if (item.children) {
     return (
-      <li key={item.name}>
+      <li key={item.name} className="menu-item-has-children has-child">
         <a>
           {item.name}
           <span />
         </a>
         <ul>
           {item.children.map((child) => (
-            <li>
+            <li key={child.name}>
               <Link key={child.name} href={child.href}>
                 <a href="03_grey-index.html">{child.name}</a>
               </Link>
