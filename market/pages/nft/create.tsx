@@ -1,5 +1,5 @@
 import NextPage from "next";
-import { BaseLayout } from "../../components/index";
+import { BaseLayout } from "@ui/index";
 
 const NftCreate: NextPage = () => {
   return (

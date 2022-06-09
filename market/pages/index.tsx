@@ -1,8 +1,8 @@
 import Head from "next/head";
 import Image from "next/image";
 import NextPage from "next";
-import { BaseLayout, NftList } from "../components/index";
-import { NftMeta } from "../types/nft";
+import { BaseLayout, NftList } from "@ui";
+import { NftMeta } from "@_types/nft";
 import nfts from "../content/meta.json"
 
 const Home: NextPage = () => {
