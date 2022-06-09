@@ -4,10 +4,20 @@ import NextPage from "next";
 import { BaseLayout, NftList } from "@ui";
 import { NftMeta } from "@_types/nft";
 import nfts from "../content/meta.json"
+import { useWeb3 } from "@providers/web3/index";
 
 const Home: NextPage = () => {
+  const test = useWeb3();
+  const getAccount = async () => {
+    const accounts = await test.provider!.listAccounts()
+    console.log(accounts[0])
+  }
+  if(test.provider) {
+    getAccount()
+  }
   return (
     <BaseLayout>
+    
       <div className="no-bottom no-top" id="content">
         <div id="top" />
         <section
