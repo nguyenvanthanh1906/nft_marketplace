@@ -10,7 +10,7 @@ const Home: NextPage = () => {
   const test = useWeb3();
   const getAccount = async () => {
     const accounts = await test.provider!.listAccounts()
-    console.log(accounts[0])
+    console.log(await test.provider!.getBalance(accounts[0]))
   }
   if(test.provider) {
     getAccount()
