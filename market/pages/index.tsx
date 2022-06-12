@@ -8,13 +8,22 @@ import { useWeb3 } from "@providers/web3/index";
 
 const Home: NextPage = () => {
   const test = useWeb3();
-  const getAccount = async () => {
-    const accounts = await test.provider!.listAccounts()
-    console.log(await test.provider!.getBalance(accounts[0]))
+  console.log(test)
+  const name = async () => {
+    const n = await test.contract!.name()
+    console.log(n)
   }
-  if(test.provider) {
-    getAccount()
+  if(test.contract) {
+    name()
   }
+  
+  // const getAccount = async () => {
+  //   const accounts = await test.provider!.listAccounts()
+  //   console.log(await test.provider!.getBalance(accounts[0]))
+  // }
+  // if(test.provider) {
+  //   getAccount()
+  // }
   return (
     <BaseLayout>
     
