@@ -1,6 +1,6 @@
-import Home from "../../pages/index";
+
 import Link from "next/link";
-import { useRouter } from "../../node_modules/next/router";
+import { useAccount } from '@hooks/web3';
 
 const navigation = [
   { name: "Home", href: "/", curent: true },
@@ -49,6 +49,10 @@ const renderLink = (item) => {
   }
 };
 export default function Navbar() {
+
+  const { account } = useAccount();
+
+  console.log(account.data);
   return (
     <>
       <header className="transparent">

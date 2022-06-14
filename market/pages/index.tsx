@@ -7,15 +7,15 @@ import nfts from "../content/meta.json"
 import { useWeb3 } from "@providers/web3/index";
 
 const Home: NextPage = () => {
-  const test = useWeb3();
-  console.log(test)
-  const name = async () => {
-    const n = await test.contract!.name()
-    console.log(n)
-  }
-  if(test.contract) {
-    name()
-  }
+  // const test = useWeb3();
+  // console.log(test)
+  // const name = async () => {
+  //   const n = await test.contract!.name()
+  //   console.log(n)
+  // }
+  // if(test.contract) {
+  //   name()
+  // }
   
   // const getAccount = async () => {
   //   const accounts = await test.provider!.listAccounts()
