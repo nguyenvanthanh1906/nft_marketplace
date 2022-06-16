@@ -1,19 +1,20 @@
 
 import Link from "next/link";
 import { useAccount } from '@hooks/web3';
+import Walletbar from './Walletbar';
 
 const navigation = [
   { name: "Home", href: "/", curent: true },
   { name: "Create", href: "/nft/create", curent: false },
-  {
-    name: "Profile",
-    href: "/profile",
-    curent: false,
-    children: [
-      { name: "Show Profile", href: "/profile", curent: false },
-      { name: "Update Profile", href: "/profile/update", curent: false },
-    ],
-  },
+  // {
+  //   name: "Profile",
+  //   href: "/profile",
+  //   curent: false,
+  //   children: [
+  //     { name: "Show Profile", href: "/profile", curent: false },
+  //     { name: "Update Profile", href: "/profile/update", curent: false },
+  //   ],
+  // },
 ];
 
 const renderLink = (item) => {
@@ -51,8 +52,9 @@ const renderLink = (item) => {
 export default function Navbar() {
 
   const { account } = useAccount();
+  console.log("Is Loading: ", account.isLoading);
+  console.log("Is Installed: ", account.isInstalled);
 
-  console.log(account.data);
   return (
     <>
       <header className="transparent">
@@ -82,13 +84,12 @@ export default function Navbar() {
                   <ul id="mainmenu">
                     {navigation.map((item) => renderLink(item))}
                   </ul>
-                  <div className="menu_side_area">
-                    <a href="02_dark-wallet.html" className="btn-main">
-                      <i className="icon_wallet_alt" />
-                      <span>Connect Wallet</span>
-                    </a>
-                    <span id="menu-btn" />
-                  </div>
+                  <Walletbar
+                    isInstalled={account.isInstalled}
+                    isLoading={account.isLoading}
+                    connect={account.connect}
+                    account={account.data}
+                  />
                 </div>
               </div>
             </div>
