@@ -15920,3 +15920,18 @@ img {
         top: -21px;
     }
 }
+
+.network {
+    width: fit-content;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    color: white;
+}
+
+.network p {
+    background-color: var(--secondary-color);;
+    padding: 0 4px;
+    border-radius: 5px;
+    margin: 0;
+}

@@ -1,6 +1,6 @@
 
 import Link from "next/link";
-import { useAccount } from '@hooks/web3';
+import { useAccount, useNetwork } from '@hooks/web3';
 import Walletbar from './Walletbar';
 
 const navigation = [
@@ -54,13 +54,15 @@ export default function Navbar() {
   const { account } = useAccount();
   console.log("Is Loading: ", account.isLoading);
   console.log("Is Installed: ", account.isInstalled);
+  const { network } = useNetwork();
 
+  console.log(network.data);
   return (
     <>
       <header className="transparent">
         <div className="container">
           <div className="row">
-            <div className="col-md-12">
+            <div className="col-md-10">
               <div className="de-flex sm-pt10">
                 <div className="de-flex-col">
                   <div className="de-flex-col">
@@ -92,6 +94,13 @@ export default function Navbar() {
                   />
                 </div>
               </div>
+            </div>
+            <div className="network">
+              <p>{network.isLoading ?
+                "Loading..." :
+                account.isInstalled ?
+                  network.data :
+                  "Install Web3 Wallet"}</p>
             </div>
           </div>
         </div>
