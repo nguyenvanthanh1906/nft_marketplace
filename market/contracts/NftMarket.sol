@@ -19,12 +19,15 @@ contract NftMarket is ERC721URIStorage {
     Counters.Counter private _listedItems;
     Counters.Counter private _tokenIds;
 
-    uint256[] private _allNfts;//chua id cua tat ca token
+    mapping(string => bool) private _usedTokenURIs; //xac định xem URI đã tồn tại chưa
+    mapping(uint256 => NftItem) private _idToNftItem; //id=>nft
 
-    mapping(string => bool) private _usedTokenURIs;//xac định xem URI đã tồn tại chưa
-    mapping(uint256 => NftItem) private _idToNftItem;//id=>nft
+    mapping(address => mapping(uint256 => uint256)) private _ownedTokens; //địa chỉ => (só thứ tự => tokenId)
+    mapping(uint256 => uint256) private _idToOwnedIndex; //tokenId => số thứ tự thứ bao nhiêu của 1 address
 
-    mapping(uint256 => uint256) private _idToNftIndex;//id=>index
+    uint256[] private _allNfts; //chua id cua tat ca token
+
+    mapping(uint256 => uint256) private _idToNftIndex; //id=>index
 
     event NftItemCreated(
         uint256 tokenId,
@@ -56,6 +59,15 @@ contract NftMarket is ERC721URIStorage {
         return _allNfts[index];
     }
 
+    function tokenOfOwnerByIndex(address owner, uint256 index)
+        public
+        view
+        returns (uint256)
+    {
+        require(index < ERC721.balanceOf(owner), "Index out of bounds");
+        return _ownedTokens[owner][index];
+    }
+
     function getAllNftsOnSale() public view returns (NftItem[] memory) {
         uint256 allItemsCounts = totalSupply();
         uint256 currentIndex = 0;
@@ -69,6 +81,19 @@ contract NftMarket is ERC721URIStorage {
                 items[currentIndex] = item;
                 currentIndex += 1;
             }
+        }
+
+        return items;
+    }
+
+    function getOwnedNfts() public view returns (NftItem[] memory) {
+        uint256 ownedItemsCount = ERC721.balanceOf(msg.sender);
+        NftItem[] memory items = new NftItem[](ownedItemsCount);
+
+        for (uint256 i = 0; i < ownedItemsCount; i++) {
+            uint256 tokenId = tokenOfOwnerByIndex(msg.sender, i);
+            NftItem storage item = _idToNftItem[tokenId];
+            items[i] = item;
         }
 
         return items;
@@ -129,12 +154,42 @@ contract NftMarket is ERC721URIStorage {
 
         // minting token
         if (from == address(0)) {
-            _addTokenToAllTokensEnumaration(tokenId);
+            _addTokenToAllTokensEnumeration(tokenId);
+        } else if (from != to) {
+            _removeTokenFromOwnerEnumeration(from, tokenId);
+        }
+
+        if (to != from) {
+            _addTokenToOwnerEnumeration(to, tokenId);
         }
     }
 
-    function _addTokenToAllTokensEnumaration(uint256 tokenId) private {
+    function _addTokenToAllTokensEnumeration(uint256 tokenId) private {
         _idToNftIndex[tokenId] = _allNfts.length;
         _allNfts.push(tokenId);
+    }
+
+    function _addTokenToOwnerEnumeration(address to, uint256 tokenId) private {
+        uint256 length = ERC721.balanceOf(to);
+        _ownedTokens[to][length] = tokenId;
+        _idToOwnedIndex[tokenId] = length;
+    }
+
+    function _removeTokenFromOwnerEnumeration(address from, uint256 tokenId)
+        private
+    {
+        uint256 lastTokenIndex = ERC721.balanceOf(from) - 1;
+        uint256 tokenIndex = _idToOwnedIndex[tokenId];
+
+        if (tokenIndex != lastTokenIndex) {
+            uint256 lastTokenId = _ownedTokens[from][lastTokenIndex];
+
+            _ownedTokens[from][tokenIndex] = lastTokenId;
+            _idToOwnedIndex[lastTokenId] = tokenIndex;
+        }
+
+        delete _idToOwnedIndex[tokenId];
+        delete _ownedTokens[from][lastTokenIndex];
+        //gán giá trị của nơi cần xóa bằng giá trị tại vị trí cuối cùng rồi gán vị trí cuối cùng=0, không thể xóa mapping, chỉ có thể gán=0
     }
 }
