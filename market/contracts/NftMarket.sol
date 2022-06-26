@@ -3,8 +3,9 @@ pragma solidity >=0.4.22 <0.9.0;
 
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract NftMarket is ERC721URIStorage {
+contract NftMarket is ERC721URIStorage, Ownable {
     using Counters for Counters.Counter;
 
     struct NftItem {
@@ -37,6 +38,11 @@ contract NftMarket is ERC721URIStorage {
     );
 
     constructor() ERC721("ABC", "VTKV") {}
+
+    function setListingPrice(uint256 newPrice) external onlyOwner {
+        require(newPrice > 0, "Price must be at least 1 wei");
+        listingPrice = newPrice;
+    }
 
     function getNftItem(uint256 tokenId) public view returns (NftItem memory) {
         return _idToNftItem[tokenId];
@@ -137,6 +143,25 @@ contract NftMarket is ERC721URIStorage {
         payable(owner).transfer(msg.value);
     }
 
+    function placeNftOnSale(uint256 tokenId, uint256 newPrice) public payable {
+        require(
+            ERC721.ownerOf(tokenId) == msg.sender,
+            "You are not owner of this nft"
+        );
+        require(
+            _idToNftItem[tokenId].isListed == false,
+            "Item is already on sale"
+        );
+        require(
+            msg.value == listingPrice,
+            "Price must be equal to listing price"
+        );
+
+        _idToNftItem[tokenId].isListed = true;
+        _idToNftItem[tokenId].price = newPrice;
+        _listedItems.increment();
+    }
+
     function _createNftItem(uint256 tokenId, uint256 price) private {
         require(price > 0, "Price must be at least 1 wei");
 
@@ -159,7 +184,9 @@ contract NftMarket is ERC721URIStorage {
             _removeTokenFromOwnerEnumeration(from, tokenId);
         }
 
-        if (to != from) {
+        if (to == address(0)) {
+            _removeTokenFromAllTokensEnumeration(tokenId);
+        } else if (to != from) {
             _addTokenToOwnerEnumeration(to, tokenId);
         }
     }
@@ -191,5 +218,17 @@ contract NftMarket is ERC721URIStorage {
         delete _idToOwnedIndex[tokenId];
         delete _ownedTokens[from][lastTokenIndex];
         //gán giá trị của nơi cần xóa bằng giá trị tại vị trí cuối cùng rồi gán vị trí cuối cùng=0, không thể xóa mapping, chỉ có thể gán=0
+    }
+
+    function _removeTokenFromAllTokensEnumeration(uint256 tokenId) private {
+        uint256 lastTokenIndex = _allNfts.length - 1;
+        uint256 tokenIndex = _idToNftIndex[tokenId];
+        uint256 lastTokenId = _allNfts[lastTokenIndex];
+
+        _allNfts[tokenIndex] = lastTokenId;
+        _idToNftIndex[lastTokenId] = tokenIndex;
+
+        delete _idToNftIndex[tokenId];
+        _allNfts.pop();
     }
 }

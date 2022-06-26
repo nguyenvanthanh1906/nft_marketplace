@@ -6,3 +6,14 @@ export type NftMeta = {
     image: string;
     likes: int;
 }
+
+export type NftCore = {
+    tokenId: number;
+    price: number;
+    creator: string;
+    isListed: boolean
+}
+
+export type Nft = {
+    meta: NftMeta
+} & NftCore

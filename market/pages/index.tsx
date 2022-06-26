@@ -2,11 +2,18 @@ import Head from "next/head";
 import Image from "next/image";
 import NextPage from "next";
 import { BaseLayout, NftList } from "@ui";
-import { NftMeta } from "@_types/nft";
+import { Nft } from '@_types/nft';
 import nfts from "../content/meta.json"
 import { useWeb3 } from "@providers/web3/index";
+import { useListedNfts } from '@hooks/web3';
+import React, { useEffect } from 'react';
+import $ from "jquery";
 
 const Home: NextPage = () => {
+  const { nfts } = useListedNfts();
+  useEffect(() => {
+    $(".d-item").slice(0, 8).show();
+  });
   // const test = useWeb3();
   // console.log(test)
   // const name = async () => {
@@ -16,7 +23,7 @@ const Home: NextPage = () => {
   // if(test.contract) {
   //   name()
   // }
-  
+
   // const getAccount = async () => {
   //   const accounts = await test.provider!.listAccounts()
   //   console.log(await test.provider!.getBalance(accounts[0]))
@@ -26,7 +33,7 @@ const Home: NextPage = () => {
   // }
   return (
     <BaseLayout>
-    
+
       <div className="no-bottom no-top" id="content">
         <div id="top" />
         <section
@@ -140,7 +147,7 @@ const Home: NextPage = () => {
                 </div>
               </div>
 
-              <NftList nfts={nfts as NftMeta[]}></NftList>
+              <NftList nfts={nfts.data as Nft[]}></NftList>
               <div className="col-md-12 text-center">
                 <a
                   href="#"
