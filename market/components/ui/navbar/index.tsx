@@ -52,11 +52,9 @@ const renderLink = (item) => {
 export default function Navbar() {
 
   const { account } = useAccount();
-  console.log("Is Loading: ", account.isLoading);
-  console.log("Is Installed: ", account.isInstalled);
+ 
   const { network } = useNetwork();
 
-  console.log(network.data);
   return (
     <>
       <header className="transparent">

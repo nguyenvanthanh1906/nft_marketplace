@@ -1,16 +1,16 @@
 import { FunctionComponent } from "react";
-import { NftMeta } from "../../../types/nft";
+import { Nft } from "../../../types/nft";
 import { NftItem } from "../../index";
 
 type NftListProps = {
-  ntfs: NftMeta[];
+  ntfs: Nft[];
 };
 
 const NftList: FunctionComponent<NftListProps> = ({ nfts }) => {
   return (
     <>
       {nfts.map((nft) => (
-        <NftItem key={nft.image} item={nft as NftMeta}></NftItem>
+        <NftItem key={nft.tokenId} item={nft}></NftItem>
       ))}
     </>
   );

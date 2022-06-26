@@ -1,7 +1,8 @@
 import { FunctionComponent } from "react";
+import { NftMeta, Nft } from "../../../../types/nft";
 
 type NftItemProps = {
-    item: NftMeta;
+    item: Nft;
   };
 
 const NftItem: FunctionComponent<NftItemProps> = ({item}) => {
@@ -45,7 +46,7 @@ const NftItem: FunctionComponent<NftItemProps> = ({item}) => {
           </div>
           <a href="item-details.html">
             <img
-              src={item.image}
+              src={item.meta.image}
               className="lazy nft__item_preview"
               alt=""
             />
@@ -53,20 +54,20 @@ const NftItem: FunctionComponent<NftItemProps> = ({item}) => {
         </div>
         <div className="nft__item_info">
           <a href="item-details.html">
-            <h4>{item.name}</h4>
+            <h4>{item.meta.name}</h4>
           </a>
           <div className="nft__item_click">
             <span />
           </div>
           <div className="nft__item_price">
-            0.005 ETH<span>1/30</span>
+          {item.price} ETH<span>1/30</span>
           </div>
           <div className="nft__item_action">
             <a href="#">Place a bid</a>
           </div>
           <div className="nft__item_like">
             <i className="fa fa-heart" />
-            <span>{item.likes}</span>
+            <span>{item.meta.likes}</span>
           </div>
         </div>
       </div>
