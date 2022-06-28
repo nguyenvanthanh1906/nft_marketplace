@@ -35,3 +35,12 @@ export const useOwnedNfts = () => {
         nfts: swrRes
     }
 }
+
+export const useGetNftItem = (tokenId) => {
+    const hooks = useHooks();
+    const swrRes = hooks.useGetNftItem(tokenId);
+  
+    return {
+      nfts: swrRes
+    }
+  }

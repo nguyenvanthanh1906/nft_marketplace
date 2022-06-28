@@ -1,5 +1,6 @@
 import { FunctionComponent } from "react";
 import { NftMeta, Nft } from "../../../../types/nft";
+import Link from 'next/link'
 
 type NftItemProps = {
     item: Nft;
@@ -44,13 +45,14 @@ const NftItem: FunctionComponent<NftItemProps> = ({item}) => {
               </div>
             </div>
           </div>
-          <a href="item-details.html">
+          <Link href={`/nft/detail?tokenId=${item.tokenId}`}>
             <img
               src={item.meta.image}
               className="lazy nft__item_preview"
               alt=""
+              style={{cursor: "pointer"}}
             />
-          </a>
+          </Link>
         </div>
         <div className="nft__item_info">
           <a href="item-details.html">
