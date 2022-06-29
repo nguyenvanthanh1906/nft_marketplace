@@ -25,6 +25,17 @@ const NftDetail: NextPage = () => {
     const pid = router.query
     let nft = useGetNftItem(pid.tokenId);
 
+    const renderListButton = () => {
+        if (!nft.nfts.data.isListed) {
+            return (
+                <a href="#"
+                    className="btn-main btn-lg btn-light"
+                    onClick={() => { nft?.nfts?.listNft(nft?.nfts?.data?.tokenId, nft?.nfts?.data?.price) }}>
+                    List Nft
+                </a>
+            )
+        }
+    }
     const renderContent = () => {
         if (nft.nfts.data) {
             return (
@@ -66,8 +77,8 @@ const NftDetail: NextPage = () => {
                                             <div className="spacer-40" />
                                             <div className="de_tab tab_simple">
                                                 <ul className="de_nav">
-                                                    <li className="active"><span>Bids</span></li>
-                                                    <li><span>History</span></li>
+                                                    <li className="active"><span>Buy</span></li>
+                                                    <li ><span>List</span></li>
                                                 </ul>
                                                 <div className="de_tab_content">
                                                     <div className="tab-1">
@@ -185,13 +196,13 @@ const NftDetail: NextPage = () => {
                                                 </div>
                                                 <div className="spacer-10" />
                                                 {/* Button trigger modal */}
-                                                <a href="#" className="btn-main btn-lg" data-bs-toggle="modal" data-bs-target="#buy_now">
+                                                <a href="#"
+                                                    className="btn-main btn-lg"
+                                                    onClick={() => { nft?.nfts?.buyNft(nft?.nfts?.data?.tokenId, nft?.nfts?.data?.price) }}>
                                                     Buy Now
                                                 </a>
                                                 &nbsp;
-                                                <a href="#" className="btn-main btn-lg btn-light" data-bs-toggle="modal" data-bs-target="#place_a_bid">
-                                                    Place a Bid
-                                                </a>
+                                                {renderListButton()}
                                             </div>
                                         </div>
                                     </div>
