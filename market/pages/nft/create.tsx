@@ -1,7 +1,33 @@
 import NextPage from "next";
 import { BaseLayout } from "@ui/index";
+import { ChangeEvent, useState } from "react";
+import { NftMeta } from "@_types/nft";
+import axios from 'axios';
 
 const NftCreate: NextPage = () => {
+  const [nftURI, setNftURI] = useState("");
+  const [hasURI, setHasURI] = useState(false);
+  const [nftMeta, setNftMeta] = useState<NftMeta>({
+    name: "",
+    description: "",
+    image: "",
+    likes: 0
+  });
+
+  const handleChange = (
+    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = e.target;
+    setNftMeta({ ...nftMeta, [name]: value });
+  };
+
+  const createNft = async () => {
+    try {
+      const messageToSign = await axios.get("/api/verify");
+    } catch (e: any) {
+      console.error(e.message);
+    }
+  };
   return (
     <BaseLayout>
       <div className="no-bottom no-top" id="content">
@@ -183,20 +209,23 @@ const NftCreate: NextPage = () => {
                     <h5>Title</h5>
                     <input
                       type="text"
-                      name="item_title"
-                      id="item_title"
+                      name="name"
+                      id="name"
+                      value={nftMeta.name}
+                      onChange={handleChange}
                       className="form-control"
                       placeholder="e.g. 'Crypto Funk"
                     />
                     <div className="spacer-20" />
                     <h5>Description</h5>
                     <textarea
+                      value={nftMeta.description}
+                      onChange={handleChange}
                       data-autoresize
-                      name="item_desc"
-                      id="item_desc"
+                      name="description"
+                      id="description"
                       className="form-control"
                       placeholder="e.g. 'This is very limited item'"
-                      defaultValue={""}
                     />
                     <div className="spacer-20" />
                     <h5>Royalties</h5>
@@ -209,6 +238,7 @@ const NftCreate: NextPage = () => {
                     />
                     <div className="spacer-single" />
                     <input
+                      onClick={createNft}
                       type="button"
                       id="submit"
                       className="btn-main"
