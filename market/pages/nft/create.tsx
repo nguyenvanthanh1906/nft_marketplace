@@ -2,17 +2,74 @@ import NextPage from "next";
 import { BaseLayout } from "@ui/index";
 import { ChangeEvent, useState } from "react";
 import { NftMeta } from "@_types/nft";
-import axios from 'axios';
+import axios from "axios";
+import { useWeb3 } from "@providers/web3";
+import { NftMeta, PinataRes } from '@_types/nft';
+
+const ALLOWED_FIELDS = ["name", "description", "image", "likes"];
 
 const NftCreate: NextPage = () => {
+  const { ethereum } = useWeb3();
   const [nftURI, setNftURI] = useState("");
   const [hasURI, setHasURI] = useState(false);
   const [nftMeta, setNftMeta] = useState<NftMeta>({
     name: "",
     description: "",
     image: "",
-    likes: 0
+    likes: 0,
   });
+
+  const getSignedData = async () => {
+    const messageToSign = await axios.get("/api/verify");
+    const accounts = (await ethereum?.request({
+      method: "eth_requestAccounts",
+    })) as string[];
+    const account = accounts[0];
+
+    const signedData = await ethereum?.request({
+      method: "personal_sign",
+      params: [
+        JSON.stringify(messageToSign.data),
+        account,
+        messageToSign.data.id,
+      ],
+    });
+
+    return { signedData, account };
+  };
+
+  const handleImage = async (e: ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0) {
+      console.error("Select a file");
+      return;
+    }
+
+    const file = e.target.files[0];
+    const buffer = await file.arrayBuffer();
+    const bytes = new Uint8Array(buffer);
+    try {
+      const { signedData, account } = await getSignedData();
+      const res = await axios.post("/api/verify-image", {
+        address: account,
+        signature: signedData,
+        bytes,
+        contentType: file.type,
+        fileName: file.name.replace(/\.[^/.]+$/, "")
+      });
+      const data = res.data as PinataRes;
+
+      setNftMeta({
+        ...nftMeta,
+        image: `${process.env.NEXT_PUBLIC_PINATA_DOMAIN}/ipfs/${data.IpfsHash}`
+      });
+    } catch (e: any) {
+      console.error(e.message);
+    }
+  };
+
+  const uploadImage = () => {
+    document.getElementById("file-upload").click();
+  };
 
   const handleChange = (
     e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -21,13 +78,39 @@ const NftCreate: NextPage = () => {
     setNftMeta({ ...nftMeta, [name]: value });
   };
 
-  const createNft = async () => {
+  const uploadMetadata = async () => {
     try {
-      const messageToSign = await axios.get("/api/verify");
+      const { signedData, account } = await getSignedData();
+
+      const res = await axios.post("/api/verify", {
+        address: account,
+        signature: signedData,
+        nft: nftMeta,
+      });
+
+      const data = res.data as PinataRes;
+      setNftURI(`${process.env.NEXT_PUBLIC_PINATA_DOMAIN}/ipfs/${data.IpfsHash}`);
     } catch (e: any) {
       console.error(e.message);
     }
   };
+
+  const createNft = async () => {
+    try {
+      const nftRes = await axios.get(nftURI);
+      const content = nftRes.data;
+
+      Object.keys(content).forEach(key => {
+        if (!ALLOWED_FIELDS.includes(key)) {
+          throw new Error("Invalid Json structure");
+        }
+      })
+
+      alert("Can create NFT");
+    } catch (e: any) {
+      console.error(e.message);
+    }
+  }
   return (
     <BaseLayout>
       <div className="no-bottom no-top" id="content">
@@ -72,8 +155,15 @@ const NftCreate: NextPage = () => {
                         id="get_file"
                         className="btn-main"
                         defaultValue="Browse"
+                        onClick={uploadImage}
                       />
-                      <input type="file" id="upload_file" />
+                      <input
+                        id="file-upload"
+                        name="file-upload"
+                        type="file"
+                        hidden
+                        onChange={handleImage}
+                      />
                     </div>
                     <div className="spacer-40" />
                     <h5>Select method</h5>
@@ -270,12 +360,14 @@ const NftCreate: NextPage = () => {
                   </div>
                   <div className="nft__item_wrap">
                     <a href="#">
-                      <img
-                        src="../images/collections/coll-item-3.jpg"
-                        id="get_file_2"
-                        className="lazy nft__item_preview"
-                        alt=""
-                      />
+
+                      {nftMeta.image ?
+                        <img src={nftMeta.image} alt="" className="h-40" /> : <img
+                          src="../images/collections/coll-item-3.jpg"
+                          id="get_file_2"
+                          className="lazy nft__item_preview"
+                          alt=""
+                        />}
                     </a>
                   </div>
                   <div className="nft__item_info">
