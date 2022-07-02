@@ -8,9 +8,11 @@ import { useWeb3 } from "@providers/web3/index";
 import { useListedNfts } from '@hooks/web3';
 import React, { useEffect } from 'react';
 import $ from "jquery";
+import { useNetwork } from '@hooks/web3';
 
 const Home: NextPage = () => {
   const { nfts } = useListedNfts();
+  const { network } = useNetwork();
   useEffect(() => {
     $(".d-item").slice(0, 8).show();
   });
@@ -146,17 +148,37 @@ const Home: NextPage = () => {
                   </div>
                 </div>
               </div>
-
-              <NftList nfts={nfts.data as Nft[]}></NftList>
-              <div className="col-md-12 text-center">
-                <a
-                  href="#"
-                  id="loadmore"
-                  className="btn-main wow fadeInUp lead"
-                >
-                  Load more
-                </a>
-              </div>
+              {network.isConnectedToNetwork ?
+                <>
+                  <NftList nfts={nfts.data as Nft[]}></NftList>
+                  <div className="col-md-12 text-center">
+                    <a
+                      href="#"
+                      id="loadmore"
+                      className="btn-main wow fadeInUp lead"
+                    >
+                      Load more
+                    </a>
+                  </div></>
+                : <div className="container-warning">
+                  <div className="container-warning-content">
+                    <div className="">
+                      <div className="horizonal-warning">
+                        <span aria-hidden="true" className="icon_error-triangle_alt icon-warning"></span>
+                        <div className="title-warning">Attention needed</div>
+                      </div>
+                      <div className="">
+                        <p>
+                          {network.isLoading ?
+                            "Loading..." :
+                            `Connect to ${network.targetNetwork}`
+                          }
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              }
             </div>
           </div>
         </section>

@@ -12,10 +12,13 @@ import "../styles/css/coloring.css";
 import "../styles/css/colors/scheme-01.css";
 import React from "react";
 import { Web3Provider } from "@providers";
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 function MyApp({ Component, pageProps }) {
   return (
     <>
+      <ToastContainer />
       <Web3Provider>
         <Component {...pageProps} />
       </Web3Provider>
