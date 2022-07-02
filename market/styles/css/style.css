@@ -15935,3 +15935,32 @@ img {
     border-radius: 5px;
     margin: 0;
 }
+
+.container-warning {
+    background-color: #f1d5a3;
+    border: 3px solid #f79502;
+    border-radius: 5px;
+    width: 80%;
+    margin: auto;
+}
+
+.container-warning-content {
+    margin: 10px 20px 10px 20px;
+}
+
+.horizonal-warning {
+    display: flex;
+    margin-bottom: 10px;
+}
+
+.icon-warning {
+    font-size: 20px;
+    color: black;
+    margin-right: 10px;
+}
+
+.title-warning {
+    line-height: 25px;
+    color: black;
+    font-size: 25px;
+}

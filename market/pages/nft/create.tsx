@@ -5,12 +5,17 @@ import { NftMeta } from "@_types/nft";
 import axios from "axios";
 import { useWeb3 } from "@providers/web3";
 import { NftMeta, PinataRes } from '@_types/nft';
+import { ethers } from 'ethers';
+import { toast } from "react-toastify";
+import { useNetwork } from '@hooks/web3';
 
 const ALLOWED_FIELDS = ["name", "description", "image", "likes"];
 
 const NftCreate: NextPage = () => {
-  const { ethereum } = useWeb3();
+  const { ethereum, contract } = useWeb3();
   const [nftURI, setNftURI] = useState("");
+  const [price, setPrice] = useState("");
+  const { network } = useNetwork();
   const [hasURI, setHasURI] = useState(false);
   const [nftMeta, setNftMeta] = useState<NftMeta>({
     name: "",
@@ -49,13 +54,21 @@ const NftCreate: NextPage = () => {
     const bytes = new Uint8Array(buffer);
     try {
       const { signedData, account } = await getSignedData();
-      const res = await axios.post("/api/verify-image", {
+      const promise = axios.post("/api/verify-image", {
         address: account,
         signature: signedData,
         bytes,
         contentType: file.type,
         fileName: file.name.replace(/\.[^/.]+$/, "")
       });
+      const res = await toast.promise(
+        promise, {
+        pending: "Uploading image",
+        success: "Image uploaded",
+        error: "Image upload error"
+      }
+      )
+
       const data = res.data as PinataRes;
 
       setNftMeta({
@@ -82,11 +95,18 @@ const NftCreate: NextPage = () => {
     try {
       const { signedData, account } = await getSignedData();
 
-      const res = await axios.post("/api/verify", {
+      const promise = axios.post("/api/verify", {
         address: account,
         signature: signedData,
         nft: nftMeta,
       });
+      const res = await toast.promise(
+        promise, {
+        pending: "Uploading metadata",
+        success: "Metadata uploaded",
+        error: "Metadata upload error"
+      }
+      )
 
       const data = res.data as PinataRes;
       setNftURI(`${process.env.NEXT_PUBLIC_PINATA_DOMAIN}/ipfs/${data.IpfsHash}`);
@@ -106,10 +126,45 @@ const NftCreate: NextPage = () => {
         }
       })
 
-      alert("Can create NFT");
+      const tx = await contract?.mintToken(
+        nftURI,
+        ethers.utils.parseEther(price), {
+        value: ethers.utils.parseEther(0.025.toString())
+      }
+      );
+
+      await toast.promise(
+        tx!.wait(), {
+        pending: "Uploading metadata",
+        success: "Metadata uploaded",
+        error: "Metadata upload error"
+      }
+      );
     } catch (e: any) {
       console.error(e.message);
     }
+  }
+  if (!network.isConnectedToNetwork) {
+    return (
+      <div className="container-warning">
+        <div className="container-warning-content">
+          <div className="">
+            <div className="horizonal-warning">
+              <span aria-hidden="true" className="icon_error-triangle_alt icon-warning"></span>
+              <div className="title-warning">Attention needed</div>
+            </div>
+            <div className="">
+              <p>
+                {network.isLoading ?
+                  "Loading..." :
+                  `Connect to ${network.targetNetwork}`
+                }
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
   }
   return (
     <BaseLayout>
@@ -304,7 +359,7 @@ const NftCreate: NextPage = () => {
                       value={nftMeta.name}
                       onChange={handleChange}
                       className="form-control"
-                      placeholder="e.g. 'Crypto Funk"
+                      placeholder="Title"
                     />
                     <div className="spacer-20" />
                     <h5>Description</h5>
@@ -315,16 +370,35 @@ const NftCreate: NextPage = () => {
                       name="description"
                       id="description"
                       className="form-control"
-                      placeholder="e.g. 'This is very limited item'"
+                      placeholder="Description"
+                    />
+                    <input
+                      onClick={uploadMetadata}
+                      type="button"
+                      id="submit"
+                      disabled={nftMeta.description ? false : true}
+                      className="btn-main"
+                      defaultValue="Upload Metadata"
                     />
                     <div className="spacer-20" />
-                    <h5>Royalties</h5>
+                    <h5>URI</h5>
                     <input
                       type="text"
-                      name="item_royalties"
-                      id="item_royalties"
+                      name="uri"
+                      id="uri"
                       className="form-control"
-                      placeholder="suggested: 0, 10%, 20%, 30%. Maximum is 70%"
+                      placeholder="URI"
+                      value={nftURI}
+                    />
+                    <h5>Price</h5>
+                    <input
+                      type="text"
+                      name="price"
+                      id="price"
+                      onChange={(e) => setPrice(e.target.value)}
+                      value={price}
+                      className="form-control"
+                      placeholder="Price"
                     />
                     <div className="spacer-single" />
                     <input
