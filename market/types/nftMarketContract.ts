@@ -58,12 +58,14 @@ export type NftMarketContractEvents =
   | 'Approval'
   | 'ApprovalForAll'
   | 'NftItemCreated'
+  | 'NftTransactions'
   | 'OwnershipTransferred'
   | 'Transfer';
 export interface NftMarketContractEventsContext {
   Approval(...parameters: any): EventFilter;
   ApprovalForAll(...parameters: any): EventFilter;
   NftItemCreated(...parameters: any): EventFilter;
+  NftTransactions(...parameters: any): EventFilter;
   OwnershipTransferred(...parameters: any): EventFilter;
   Transfer(...parameters: any): EventFilter;
 }
@@ -113,6 +115,13 @@ export interface NftItemCreatedEventEmittedResponse {
   price: BigNumberish;
   creator: string;
   isListed: boolean;
+}
+export interface NftTransactionsEventEmittedResponse {
+  tokenId: BigNumberish;
+  price: BigNumberish;
+  from: string;
+  to: string;
+  time: BigNumberish;
 }
 export interface OwnershipTransferredEventEmittedResponse {
   previousOwner: string;

@@ -20,6 +20,26 @@ export const hookFactory: GetNftsItemHookFactory = ({ contract }) => (tokenId) =
             const nft = {} as Nft
             const coreNfts = await contract!.getNftItem(tokenId);
 
+            let transactions = []
+            try {
+                const topics = contract.filters.NftTransactions()
+                const events = await contract.queryFilter(topics);
+                for (let i = 0; i < events.length; i++) {
+                    if (parseInt(events[i].args.tokenId) == tokenId) {
+                        let transaction = {
+                            'tokenId': parseInt(events[i].args.tokenId),
+                            'price': parseFloat(ethers.utils.formatEther((events[i].args.price))),
+                            'from': events[i].args.from,
+                            'to': events[i].args.to,
+                            'time': new Date(parseInt(events[i].args.time)).toLocaleTimeString("en-US")
+                        }
+                        transactions.push(transaction)
+                    }
+                }
+            } catch (e) {
+                console.log(e)
+            }
+
             const item = coreNfts;
             const tokenURI = await contract!.tokenURI(tokenId);
             const metaRes = await fetch(tokenURI);
@@ -30,6 +50,7 @@ export const hookFactory: GetNftsItemHookFactory = ({ contract }) => (tokenId) =
             nft.creator = item.creator
             nft.isListed = item.isListed
             nft.meta = meta
+            nft.transactions = transactions
 
             return nft;
         }

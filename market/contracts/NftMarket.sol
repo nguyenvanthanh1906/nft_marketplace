@@ -31,10 +31,18 @@ contract NftMarket is ERC721URIStorage, Ownable {
     mapping(uint256 => uint256) private _idToNftIndex; //id=>index
 
     event NftItemCreated(
-        uint256 tokenId,
+        uint256 indexed tokenId,
         uint256 price,
         address creator,
         bool isListed
+    );
+
+    event NftTransactions(
+        uint256 indexed tokenId,
+        uint256 price,
+        address from,
+        address to,
+        uint time
     );
 
     constructor() ERC721("ABC", "VTKV") {}
@@ -141,6 +149,8 @@ contract NftMarket is ERC721URIStorage, Ownable {
 
         _transfer(owner, msg.sender, tokenId);
         payable(owner).transfer(msg.value);
+
+        emit NftTransactions(tokenId, msg.value, owner, msg.sender, block.timestamp);
     }
 
     function placeNftOnSale(uint256 tokenId, uint256 newPrice) public payable {
@@ -168,6 +178,7 @@ contract NftMarket is ERC721URIStorage, Ownable {
         _idToNftItem[tokenId] = NftItem(tokenId, price, msg.sender, true);
 
         emit NftItemCreated(tokenId, price, msg.sender, true);
+        emit NftTransactions(tokenId, price, address(0), msg.sender, block.timestamp);
     }
 
     function _beforeTokenTransfer(
