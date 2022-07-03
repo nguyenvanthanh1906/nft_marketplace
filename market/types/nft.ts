@@ -16,6 +16,7 @@ export type NftCore = {
 
 export type Nft = {
     meta: NftMeta
+    transactions: any[]
 } & NftCore
 
 export type FileReq = {
