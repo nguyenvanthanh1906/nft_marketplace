@@ -34,7 +34,7 @@ export const hookFactory: GetNftsItemHookFactory = ({ contract }) => (tokenId) =
                 let s;
                 if (sub > 0) {
                     m = sub/1000/60
-                    s = sub/1000%60
+                    s = sub/1000
                 } else {
                     m = 0;
                     s = 0;

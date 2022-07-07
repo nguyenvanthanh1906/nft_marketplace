@@ -80,7 +80,7 @@ const NftDetail: NextPage = () => {
                                     </div>
                                     <div className="col-md-6">
                                         <div className="item_info">
-                                            Auctions ends in {time.minute}m {time.second}s
+                                            Auctions ends in {time.second}s
                                             <h2>{nft?.nfts?.data?.meta?.name}</h2>
                                             <div className="item_info_counts">
                                                 <div className="item_info_type"><i className="fa fa-image" />Art</div>
