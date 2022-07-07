@@ -65,7 +65,7 @@ export default function Navbar() {
                 <div className="de-flex-col">
                   <div className="de-flex-col">
                     <div id="logo">
-                      <h2 href="02_dark-index.html" style={{'color':'white', 'margin-top': '10px'}}>
+                      <h2 href="02_dark-index.html" style={{'color':'white', 'marginTop': '10px'}}>
                         OpenMountain
                       </h2>
                     </div>

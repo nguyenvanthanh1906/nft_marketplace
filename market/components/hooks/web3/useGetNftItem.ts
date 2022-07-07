@@ -24,9 +24,25 @@ export const hookFactory: GetNftsItemHookFactory = ({ contract }) => (tokenId) =
             const coreNfts = await contract!.getNftItem(tokenId);
 
             let transactions = []
+            let time = {}
             try {
                 const topics = contract.filters.NftTransactions()
                 const events = await contract.queryFilter(topics);
+                const endAt = await contract.getEndAtById(tokenId)
+                const sub = Math.floor(parseInt(endAt) - Date.now());
+                let m;
+                let s;
+                if (sub > 0) {
+                    m = sub/1000/60
+                    s = sub/1000%60
+                } else {
+                    m = 0;
+                    s = 0;
+                }
+                time = {
+                    'minute': m,
+                    'second': s
+                }
                 for (let i = 0; i < events.length; i++) {
                     if (parseInt(events[i].args.tokenId) == tokenId) {
                         let transaction = {
@@ -54,6 +70,7 @@ export const hookFactory: GetNftsItemHookFactory = ({ contract }) => (tokenId) =
             nft.isListed = item.isListed
             nft.meta = meta
             nft.transactions = transactions
+            nft.time = time
 
             return nft;
         }
@@ -63,7 +80,8 @@ export const hookFactory: GetNftsItemHookFactory = ({ contract }) => (tokenId) =
     const start = useCallback(async (tokenId: number) => {
         try {
             const result = await _contract!.start(
-                tokenId
+                tokenId,
+                Date.now()
             )
 
             await toast.promise(
@@ -81,7 +99,8 @@ export const hookFactory: GetNftsItemHookFactory = ({ contract }) => (tokenId) =
     const end = useCallback(async (tokenId: number) => {
         try {
             const result = await _contract!.end(
-                tokenId
+                tokenId,
+                Date.now()
             )
 
             await toast.promise(
@@ -99,7 +118,8 @@ export const hookFactory: GetNftsItemHookFactory = ({ contract }) => (tokenId) =
     const bid = useCallback(async (tokenId: number, value: number) => {
         try {
             const result = await _contract!.bid(
-                tokenId, {
+                tokenId, 
+                Date.now(), {
                     value: ethers.utils.parseEther(value.toString())
                 }
             )

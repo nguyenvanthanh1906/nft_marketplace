@@ -58,7 +58,7 @@ const Home: NextPage = () => {
           <div className="container">
             <div className="row wow fadeIn">
               <div className="col-lg-12">
-                <div className="items_filter">
+                {/* <div className="items_filter">
                   <form
                     action="blank.php"
                     className="row form-dark"
@@ -146,7 +146,7 @@ const Home: NextPage = () => {
                       </li>
                     </ul>
                   </div>
-                </div>
+                </div> */}
               </div>
               {network.isConnectedToNetwork ?
                 <>
