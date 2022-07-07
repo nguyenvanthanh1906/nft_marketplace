@@ -8,6 +8,9 @@ import { toast } from "react-toastify";
 type UseListedNftsResponse = {
     buyNft: (token: number, value: number) => Promise<void>
     listNft: (tokenId: number, price: number) => Promise<void>
+    start: (tokenId: number) => Promise<void>
+    end: (tokenId: number) => Promise<void>
+    bid: (tokenId: number, price: number) => Promise<void>
 }
 type GetNftsItemHookFactory = CryptoHookFactory<Nft, GetNftsItemResponse>
 
@@ -57,6 +60,62 @@ export const hookFactory: GetNftsItemHookFactory = ({ contract }) => (tokenId) =
     )
     const _contract = contract;
 
+    const start = useCallback(async (tokenId: number) => {
+        try {
+            const result = await _contract!.start(
+                tokenId
+            )
+
+            await toast.promise(
+                result!.wait(), {
+                pending: "Processing transaction",
+                success: "Nft is yours! Go to Profile page",
+                error: "Processing error"
+            }
+            );
+        } catch (e: any) {
+            console.error(e.message);
+        }
+    }, [_contract])
+
+    const end = useCallback(async (tokenId: number) => {
+        try {
+            const result = await _contract!.end(
+                tokenId
+            )
+
+            await toast.promise(
+                result!.wait(), {
+                pending: "Processing transaction",
+                success: "Nft is yours! Go to Profile page",
+                error: "Processing error"
+            }
+            );
+        } catch (e: any) {
+            console.error(e);
+        }
+    }, [_contract])
+
+    const bid = useCallback(async (tokenId: number, value: number) => {
+        try {
+            const result = await _contract!.bid(
+                tokenId, {
+                    value: ethers.utils.parseEther(value.toString())
+                }
+            )
+
+            await toast.promise(
+                result!.wait(), {
+                pending: "Processing transaction",
+                success: "Nft is yours! Go to Profile page",
+                error: "Processing error"
+            }
+            );
+        } catch (e: any) {
+            console.error(e.message);
+        }
+    }, [_contract])
+
     const buyNft = useCallback(async (tokenId: number, value: number) => {
         try {
             const result = await _contract!.buyNft(
@@ -102,6 +161,9 @@ export const hookFactory: GetNftsItemHookFactory = ({ contract }) => (tokenId) =
         ...swr,
         buyNft,
         listNft,
+        start,
+        end,
+        bid,
         data: data,
     };
 }
