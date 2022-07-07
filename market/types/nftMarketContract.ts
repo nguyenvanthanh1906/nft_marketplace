@@ -88,6 +88,7 @@ export type NftMarketContractMethodNames =
   | 'tokenURI'
   | 'transferFrom'
   | 'transferOwnership'
+  | 'getEndAtById'
   | 'start'
   | 'bid'
   | 'end'
@@ -344,13 +345,26 @@ export interface NftMarketContract {
   ): Promise<ContractTransaction>;
   /**
    * Payable: false
+   * Constant: true
+   * StateMutability: view
+   * Type: function
+   * @param tokenId Type: uint256, Indexed: false
+   */
+  getEndAtById(
+    tokenId: BigNumberish,
+    overrides?: ContractCallOverrides
+  ): Promise<BigNumber>;
+  /**
+   * Payable: false
    * Constant: false
    * StateMutability: nonpayable
    * Type: function
    * @param tokenId Type: uint256, Indexed: false
+   * @param time Type: uint256, Indexed: false
    */
   start(
     tokenId: BigNumberish,
+    time: BigNumberish,
     overrides?: ContractTransactionOverrides
   ): Promise<ContractTransaction>;
   /**
@@ -359,9 +373,11 @@ export interface NftMarketContract {
    * StateMutability: payable
    * Type: function
    * @param tokenId Type: uint256, Indexed: false
+   * @param time Type: uint256, Indexed: false
    */
   bid(
     tokenId: BigNumberish,
+    time: BigNumberish,
     overrides?: ContractTransactionOverrides
   ): Promise<ContractTransaction>;
   /**
@@ -370,9 +386,11 @@ export interface NftMarketContract {
    * StateMutability: payable
    * Type: function
    * @param tokenId Type: uint256, Indexed: false
+   * @param time Type: uint256, Indexed: false
    */
   end(
     tokenId: BigNumberish,
+    time: BigNumberish,
     overrides?: ContractTransactionOverrides
   ): Promise<ContractTransaction>;
   /**

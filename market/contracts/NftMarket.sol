@@ -53,24 +53,28 @@ contract NftMarket is ERC721URIStorage, Ownable {
 
     constructor() ERC721("ABC", "VTKV") {}
 
-    function start(uint256 tokenId) external {
+    function getEndAtById(uint256 tokenId) public view returns(uint256) {
+        return _idToEndAt[tokenId];
+    }
+
+    function start(uint256 tokenId, uint256 time) external {
         address owner = ERC721.ownerOf(tokenId);
         bool isStarted = _idToStarted[tokenId];
         require(msg.sender == owner, "not seller");
         require(isStarted == false, "started");
         _idToStarted[tokenId] = true;
-        _idToEndAt[tokenId] = block.timestamp + 60;
+        _idToEndAt[tokenId] = time + 1000*100;
         _idToBidOwn[tokenId] = owner;
         _transfer(owner, address(this), tokenId);
     }
 
-    function bid(uint256 tokenId) external payable {
+    function bid(uint256 tokenId, uint256 time) external payable {
         bool isStarted = _idToStarted[tokenId];
         uint256 endAt = _idToEndAt[tokenId];
         uint256 highestBid = _idToHighestBid[tokenId];
         address highestBidder = _idToHighestBidder[tokenId];
         require(isStarted, "not started");
-        require(block.timestamp < endAt, "ended");
+        require(time < endAt, "ended");
         require(msg.value > highestBid, " value < highest bid");
         if(highestBidder != address(0)) {
             payable(highestBidder).transfer(highestBid);
@@ -79,17 +83,21 @@ contract NftMarket is ERC721URIStorage, Ownable {
         _idToHighestBidder[tokenId] = msg.sender;
     }
 
-    function end(uint256 tokenId) external payable{
+    function end(uint256 tokenId, uint256 time) external payable{
         address bidOwn = _idToBidOwn[tokenId];
         bool isStarted = _idToStarted[tokenId];
         uint256 endAt = _idToEndAt[tokenId];
         uint256 highestBid = _idToHighestBid[tokenId];
         address highestBidder = _idToHighestBidder[tokenId];
         require(isStarted, "not started");
-        require(block.timestamp >= endAt, "ended");
+        require(time >= endAt, "ended");
         _idToStarted[tokenId] = false;
         _idToEndAt[tokenId] = 0;
-        _transfer(address(this), highestBidder, tokenId);
+        if(highestBidder == address(0)) {
+            _transfer(address(this), bidOwn, tokenId);
+        } else {
+            _transfer(address(this), highestBidder, tokenId);
+        }
         payable(bidOwn).transfer(highestBid);
         _idToHighestBid[tokenId] = 0;
         _idToHighestBidder[tokenId] = address(0);

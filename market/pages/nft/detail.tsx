@@ -3,6 +3,7 @@ import { BaseLayout } from "@ui/index";
 import { useGetNftItem } from '@hooks/web3';
 import { useRouter } from 'next/router'
 import React, { useEffect } from 'react';
+import { ChangeEvent, useState } from "react";
 
 // export const getServerSideProps: GetServerSideProps = async (context) => {
 
@@ -25,7 +26,9 @@ const NftDetail: NextPage = () => {
     const pid = router.query
     let nft = useGetNftItem(pid.tokenId);
     let transactions = nft?.nfts?.data?.transactions
-    
+    let time = nft?.nfts?.data?.time
+    const [price, setPrice] = useState("");
+
     const renderTransactions = () => {
         return (
             transactions?.map((t, i) =>
@@ -77,7 +80,7 @@ const NftDetail: NextPage = () => {
                                     </div>
                                     <div className="col-md-6">
                                         <div className="item_info">
-                                            Auctions ends in <div className="de_countdown" data-year={2021} data-month={11} data-day={16} data-hour={8} />
+                                            Auctions ends in {time.minute}m {time.second}s
                                             <h2>{nft?.nfts?.data?.meta?.name}</h2>
                                             <div className="item_info_counts">
                                                 <div className="item_info_type"><i className="fa fa-image" />Art</div>
@@ -89,28 +92,44 @@ const NftDetail: NextPage = () => {
                                                 <div className="de_tab_content">
                                                     {renderTransactions()}
                                                 </div>
-                                                <div className="spacer-10" />
+                                                <div className="spacer-20" />
                                                 {/* Button trigger modal */}
                                                 <a href="#"
+                                                    style={{ 'marginLeft': '30px' }}
                                                     className="btn-main btn-lg"
                                                     onClick={() => { nft?.nfts?.buyNft(nft?.nfts?.data?.tokenId, nft?.nfts?.data?.price) }}>
                                                     Buy Now
                                                 </a>
+
                                                 <a href="#"
+                                                    style={{ 'marginLeft': '30px' }}
                                                     className="btn-main btn-lg"
                                                     onClick={() => { nft?.nfts?.start(nft?.nfts?.data?.tokenId) }}>
                                                     Start
                                                 </a>
+
                                                 <a href="#"
+                                                    style={{ 'marginLeft': '30px' }}
                                                     className="btn-main btn-lg"
                                                     onClick={() => { nft?.nfts?.end(nft?.nfts?.data?.tokenId) }}>
                                                     End
                                                 </a>
+
                                                 <a href="#"
+                                                    style={{ 'marginLeft': '30px' }}
                                                     className="btn-main btn-lg"
-                                                    onClick={() => { nft?.nfts?.bid(nft?.nfts?.data?.tokenId, 0.9) }}>
+                                                    onClick={() => { nft?.nfts?.bid(nft?.nfts?.data?.tokenId, price) }}>
                                                     Bid
                                                 </a>
+                                                <input
+                                                    type="text"
+                                                    name="price"
+                                                    style={{ 'marginTop': '30px' }}
+                                                    onChange={(e) => setPrice(e.target.value)}
+                                                    id="price"
+                                                    className="form-control"
+                                                    placeholder="Price"
+                                                />
                                                 &nbsp;
                                                 {renderListButton()}
                                             </div>
