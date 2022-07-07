@@ -96,6 +96,21 @@ const NftDetail: NextPage = () => {
                                                     onClick={() => { nft?.nfts?.buyNft(nft?.nfts?.data?.tokenId, nft?.nfts?.data?.price) }}>
                                                     Buy Now
                                                 </a>
+                                                <a href="#"
+                                                    className="btn-main btn-lg"
+                                                    onClick={() => { nft?.nfts?.start(nft?.nfts?.data?.tokenId) }}>
+                                                    Start
+                                                </a>
+                                                <a href="#"
+                                                    className="btn-main btn-lg"
+                                                    onClick={() => { nft?.nfts?.end(nft?.nfts?.data?.tokenId) }}>
+                                                    End
+                                                </a>
+                                                <a href="#"
+                                                    className="btn-main btn-lg"
+                                                    onClick={() => { nft?.nfts?.bid(nft?.nfts?.data?.tokenId, 0.9) }}>
+                                                    Bid
+                                                </a>
                                                 &nbsp;
                                                 {renderListButton()}
                                             </div>

@@ -88,6 +88,9 @@ export type NftMarketContractMethodNames =
   | 'tokenURI'
   | 'transferFrom'
   | 'transferOwnership'
+  | 'start'
+  | 'bid'
+  | 'end'
   | 'setListingPrice'
   | 'getNftItem'
   | 'listedItemsCount'
@@ -337,6 +340,39 @@ export interface NftMarketContract {
    */
   transferOwnership(
     newOwner: string,
+    overrides?: ContractTransactionOverrides
+  ): Promise<ContractTransaction>;
+  /**
+   * Payable: false
+   * Constant: false
+   * StateMutability: nonpayable
+   * Type: function
+   * @param tokenId Type: uint256, Indexed: false
+   */
+  start(
+    tokenId: BigNumberish,
+    overrides?: ContractTransactionOverrides
+  ): Promise<ContractTransaction>;
+  /**
+   * Payable: true
+   * Constant: false
+   * StateMutability: payable
+   * Type: function
+   * @param tokenId Type: uint256, Indexed: false
+   */
+  bid(
+    tokenId: BigNumberish,
+    overrides?: ContractTransactionOverrides
+  ): Promise<ContractTransaction>;
+  /**
+   * Payable: true
+   * Constant: false
+   * StateMutability: payable
+   * Type: function
+   * @param tokenId Type: uint256, Indexed: false
+   */
+  end(
+    tokenId: BigNumberish,
     overrides?: ContractTransactionOverrides
   ): Promise<ContractTransaction>;
   /**
