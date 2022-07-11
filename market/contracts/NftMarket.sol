@@ -13,6 +13,7 @@ contract NftMarket is ERC721URIStorage, Ownable {
         uint256 price;
         address creator;
         bool isListed;
+        address owner;
     }
 
     uint256 public listingPrice = 0.025 ether;
@@ -32,6 +33,7 @@ contract NftMarket is ERC721URIStorage, Ownable {
 
     mapping(uint256 => bool) private _idToStarted; //id => is started bid
     mapping(uint256 => uint256) private _idToEndAt;
+    mapping(uint256 => uint256) private _idToStartPrice;
     mapping(uint256 => address) private _idToHighestBidder;
     mapping(uint256 => uint256) private _idToHighestBid;
     mapping(uint256 => address) private _idToBidOwn;
@@ -57,21 +59,61 @@ contract NftMarket is ERC721URIStorage, Ownable {
         return _idToEndAt[tokenId];
     }
 
-    function start(uint256 tokenId, uint256 time) external {
+    function getStartPriceById(uint256 tokenId) public view returns(uint256) {
+        return _idToStartPrice[tokenId];
+    }
+
+    function getHighestPriceById(uint256 tokenId) public view returns(uint256) {
+        return _idToHighestBid[tokenId];
+    }
+
+    function getHighestBidderById(uint256 tokenId) public view returns(address) {
+        return _idToHighestBidder[tokenId];
+    }
+
+    function getBidOwner(uint256 tokenId) public view returns(address) {
+        return _idToBidOwn[tokenId];
+    }
+
+    function unListNft(uint256 tokenId) public {
+        require(
+            ERC721.ownerOf(tokenId) == msg.sender,
+            "You are not owner of this nft"
+        );
+        require(
+            _idToNftItem[tokenId].isListed == true,
+            "Item is already on sale"
+        );
+
+        _idToNftItem[tokenId].isListed = false;
+        _idToNftItem[tokenId].price = 0;
+        _listedItems.decrement();
+    }
+
+    function start(uint256 tokenId, uint256 time, uint256 startPrice, uint256 countDown) external {
         address owner = ERC721.ownerOf(tokenId);
         bool isStarted = _idToStarted[tokenId];
+        require(_idToNftItem[tokenId].isListed == false, "selling can not place a bid");
         require(msg.sender == owner, "not seller");
         require(isStarted == false, "started");
+        require(startPrice > 0, "starting price must be greater than 0");
         _idToStarted[tokenId] = true;
-        _idToEndAt[tokenId] = time + 100;
+        _idToEndAt[tokenId] = time + countDown*1000;
         _idToBidOwn[tokenId] = owner;
+        _idToStartPrice[tokenId] = startPrice;
+        _idToNftItem[tokenId].owner = address(this);
         _transfer(owner, address(this), tokenId);
     }
 
     function bid(uint256 tokenId, uint256 time) external payable {
         bool isStarted = _idToStarted[tokenId];
         uint256 endAt = _idToEndAt[tokenId];
-        uint256 highestBid = _idToHighestBid[tokenId];
+        uint256 highestBid;
+        if (_idToHighestBid[tokenId] != 0) {
+            highestBid = _idToHighestBid[tokenId];
+        } else {
+            highestBid = _idToStartPrice[tokenId];
+        }
         address highestBidder = _idToHighestBidder[tokenId];
         require(isStarted, "not started");
         require(time < endAt, "ended");
@@ -84,6 +126,7 @@ contract NftMarket is ERC721URIStorage, Ownable {
     }
 
     function end(uint256 tokenId, uint256 time) external payable{
+        address creator =  _idToNftItem[tokenId].creator;
         address bidOwn = _idToBidOwn[tokenId];
         bool isStarted = _idToStarted[tokenId];
         uint256 endAt = _idToEndAt[tokenId];
@@ -91,17 +134,22 @@ contract NftMarket is ERC721URIStorage, Ownable {
         address highestBidder = _idToHighestBidder[tokenId];
         require(isStarted, "not started");
         require(time >= endAt, "ended");
+        require(msg.sender == highestBidder || msg.sender == bidOwn, "not highest bidder or owner");
         _idToStarted[tokenId] = false;
         _idToEndAt[tokenId] = 0;
         if(highestBidder == address(0)) {
+            _idToNftItem[tokenId] = NftItem(tokenId, highestBid, creator, false, bidOwn);
             _transfer(address(this), bidOwn, tokenId);
         } else {
+            _idToNftItem[tokenId] = NftItem(tokenId, highestBid, creator, false, highestBidder);
             _transfer(address(this), highestBidder, tokenId);
         }
         payable(bidOwn).transfer(highestBid);
         _idToHighestBid[tokenId] = 0;
         _idToHighestBidder[tokenId] = address(0);
         _idToBidOwn[tokenId] = address(0);
+        _idToStartPrice[tokenId] = 0;
+        emit NftTransactions(tokenId, highestBid, bidOwn, highestBidder, block.timestamp);
     }
 
     function setListingPrice(uint256 newPrice) external onlyOwner {
@@ -196,6 +244,7 @@ contract NftMarket is ERC721URIStorage, Ownable {
 
     function buyNft(uint256 tokenId) public payable {
         uint256 price = _idToNftItem[tokenId].price;
+        address creator =  _idToNftItem[tokenId].creator;
         address owner = ERC721.ownerOf(tokenId);
 
         require(msg.sender != owner, "You already own this NFT");
@@ -203,6 +252,8 @@ contract NftMarket is ERC721URIStorage, Ownable {
 
         _idToNftItem[tokenId].isListed = false;
         _listedItems.decrement();
+
+        _idToNftItem[tokenId] = NftItem(tokenId, msg.value, creator, false, msg.sender);
 
         _transfer(owner, msg.sender, tokenId);
         payable(owner).transfer(msg.value);
@@ -232,7 +283,7 @@ contract NftMarket is ERC721URIStorage, Ownable {
     function _createNftItem(uint256 tokenId, uint256 price) private {
         require(price > 0, "Price must be at least 1 wei");
 
-        _idToNftItem[tokenId] = NftItem(tokenId, price, msg.sender, true);
+        _idToNftItem[tokenId] = NftItem(tokenId, price, msg.sender, true, msg.sender);
 
         emit NftItemCreated(tokenId, price, msg.sender, true);
         emit NftTransactions(tokenId, price, address(0), msg.sender, block.timestamp);

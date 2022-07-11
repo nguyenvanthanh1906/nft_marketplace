@@ -5,6 +5,7 @@ import { useRouter } from 'next/router'
 import React, { useEffect } from 'react';
 import { ChangeEvent, useState } from "react";
 import Countdown from 'react-countdown';
+import { useAccount, useNetwork } from '@hooks/web3';
 
 // export const getServerSideProps: GetServerSideProps = async (context) => {
 
@@ -23,13 +24,21 @@ import Countdown from 'react-countdown';
 // }
 
 const NftDetail: NextPage = () => {
+    const { account } = useAccount();
     const router = useRouter()
     const pid = router.query
     let nft = useGetNftItem(pid.tokenId);
     let transactions = nft?.nfts?.data?.transactions
-    let endAt = nft?.nfts?.data?.endAt/1000
+    let endAt = nft?.nfts?.data?.endAt
+    let startPrice = nft?.nfts?.data?.startPrice
+    let highestPrice = nft?.nfts?.data?.highestPrice
+    let highestBidder = nft?.nfts?.data?.highestBidder
+    let bidOwner = nft?.nfts?.data?.bidOwner
     const [price, setPrice] = useState("");
-
+    const [listPrice, setListPrice] = useState("");
+    const [startPriceInput, setStartPriceInput] = useState("");
+    const [countDown, setCountDown] = useState("");
+    console.log(nft)
     const renderTransactions = () => {
         return (
             transactions?.map((t, i) =>
@@ -37,8 +46,7 @@ const NftDetail: NextPage = () => {
                     <div className="p_list">
                         <div className="p_list_pp">
                             <a href="author.html">
-                                <img className="lazy" src="images/author/author-3.jpg" alt="" />
-                                <i className="fa fa-check" />
+                                <span aria-hidden="true" className="fa fa-check" style={{ 'marginLeft': '40px' }}></span>
                             </a>
                         </div>
                         <div className="p_list_info">
@@ -52,16 +60,49 @@ const NftDetail: NextPage = () => {
             )
         )
     }
-    const renderListButton = () => {
-        if (!nft.nfts.data.isListed) {
-            return (
-                <a href="#"
-                    className="btn-main btn-lg btn-light"
-                    onClick={() => { nft?.nfts?.listNft(nft?.nfts?.data?.tokenId, nft?.nfts?.data?.price) }}>
-                    List Nft
-                </a>
-            )
-        }
+    const renderModal = (func, tokenId, value, setState, nameModal) => {
+        return (
+            <div className="modal fade" id={nameModal} tabIndex={-1} aria-labelledby="exampleModalLabel" aria-hidden="true">
+                <div className="modal-dialog">
+                    <div className="modal-content">
+                        <div className="modal-header">
+                            <h5 className="modal-title" id="exampleModalLabel">Setting price</h5>
+                            <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close" />
+                        </div>
+                        <div className="modal-body">
+                            <input
+                                type="text"
+                                name="listPriceInput"
+                                style={{ 'marginTop': '30px' }}
+                                onChange={(e) => setState(e.target.value)}
+                                id="listPriceInput"
+                                className="form-control"
+                                placeholder="Price"
+                            />
+                            {nameModal == 'startModal'
+                                ? <input
+                                    type="text"
+                                    name="time"
+                                    style={{ 'marginTop': '30px' }}
+                                    onChange={(e) => setCountDown(e.target.value)}
+                                    id="time"
+                                    className="form-control"
+                                    placeholder="Time"
+                                />
+                                : <></>
+                            }
+                        </div>
+                        <div className="modal-footer">
+                            <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            {nameModal == 'startModal'
+                                ? <button type="button" className="btn btn-primary" onClick={() => { func(tokenId, value, countDown) }}>Confirm</button>
+                                : <button type="button" className="btn btn-primary" onClick={() => { func(tokenId, value) }}>Confirm</button>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        )
     }
     const renderContent = () => {
         if (nft.nfts.data) {
@@ -81,13 +122,31 @@ const NftDetail: NextPage = () => {
                                     </div>
                                     <div className="col-md-6">
                                         <div className="item_info">
-                                            Auctions ends in <Countdown date={endAt} />
+                                            {endAt > Date.now() ? <div>Auctions ends in <Countdown date={endAt} /></div> : <div></div>}
                                             <h2>{nft?.nfts?.data?.meta?.name}</h2>
                                             <div className="item_info_counts">
-                                                <div className="item_info_type"><i className="fa fa-image" />Art</div>
-                                                <div className="item_info_views"><i className="fa fa-eye" />250</div>
-                                                <div className="item_info_like"><i className="fa fa-heart" />18</div>
+                                                <div><b>Creator:</b> {nft?.nfts?.data?.creator}</div>
                                             </div>
+                                            <div className="item_info_counts">
+                                                <div><b>Owner:</b> {nft?.nfts?.data?.owner}</div>
+                                            </div>
+                                            {
+                                                startPrice == 0
+                                                    ? <div className="item_info_counts"><h3>Price: {nft?.nfts?.data?.price} ETH</h3> </div>
+                                                    : <div className="item_info_counts"><h3>Start price: {startPrice} ETH</h3></div>
+                                            }
+                                            {
+                                                startPrice != 0
+                                                    ? <div className="item_info_counts"><div><b>Highest price:</b> {highestPrice} ETH</div> </div>
+                                                    : <></>
+                                            }
+                                            {
+                                                startPrice != 0
+                                                    ? <div className="item_info_counts">
+                                                        <div><b>Highest bidder:</b> {highestBidder}</div>
+                                                    </div>
+                                                    : <></>
+                                            }
                                             <p>{nft?.nfts?.data?.meta?.description}</p>
                                             <div className="de_tab tab_simple">
                                                 <div className="de_tab_content">
@@ -95,44 +154,60 @@ const NftDetail: NextPage = () => {
                                                 </div>
                                                 <div className="spacer-20" />
                                                 {/* Button trigger modal */}
-                                                <a href="#"
+                                                {account.data != nft?.nfts?.data?.owner && nft?.nfts?.data?.startPrice == 0 && nft.nfts.data.isListed ? <a href="#"
                                                     style={{ 'marginLeft': '30px' }}
-                                                    className="btn-main btn-lg"
+                                                    className="btn-main btn-lg btn-light"
                                                     onClick={() => { nft?.nfts?.buyNft(nft?.nfts?.data?.tokenId, nft?.nfts?.data?.price) }}>
                                                     Buy Now
-                                                </a>
-
-                                                <a href="#"
-                                                    style={{ 'marginLeft': '30px' }}
-                                                    className="btn-main btn-lg"
-                                                    onClick={() => { nft?.nfts?.start(nft?.nfts?.data?.tokenId) }}>
-                                                    Start
-                                                </a>
-
-                                                <a href="#"
-                                                    style={{ 'marginLeft': '30px' }}
-                                                    className="btn-main btn-lg"
-                                                    onClick={() => { nft?.nfts?.end(nft?.nfts?.data?.tokenId) }}>
-                                                    End
-                                                </a>
-
-                                                <a href="#"
-                                                    style={{ 'marginLeft': '30px' }}
-                                                    className="btn-main btn-lg"
-                                                    onClick={() => { nft?.nfts?.bid(nft?.nfts?.data?.tokenId, price) }}>
-                                                    Bid
-                                                </a>
-                                                <input
-                                                    type="text"
-                                                    name="price"
-                                                    style={{ 'marginTop': '30px' }}
-                                                    onChange={(e) => setPrice(e.target.value)}
-                                                    id="price"
-                                                    className="form-control"
-                                                    placeholder="Price"
-                                                />
-                                                &nbsp;
-                                                {renderListButton()}
+                                                </a> : <div></div>}
+                                                {account.data == nft?.nfts?.data?.owner && !nft.nfts.data.isListed && nft?.nfts?.data?.startPrice == 0 ?
+                                                    <><a href="#"
+                                                        style={{ 'marginLeft': '30px' }}
+                                                        className="btn-main btn-lg"
+                                                        data-bs-toggle="modal" data-bs-target="#startModal"
+                                                    >
+                                                        Start
+                                                    </a>
+                                                        {renderModal(nft?.nfts?.start, nft?.nfts?.data?.tokenId, startPriceInput, setStartPriceInput, 'startModal')}
+                                                    </>
+                                                    : <></>}
+                                                {(account.data == bidOwner || account.data == highestBidder) && !nft.nfts.data.isListed && nft?.nfts?.data?.startPrice > 0 && nft?.nfts?.data?.endAt < Date.now() ?
+                                                    <a href="#"
+                                                        style={{ 'marginLeft': '30px' }}
+                                                        className="btn-main btn-lg btn-light"
+                                                        onClick={() => { nft?.nfts?.end(nft?.nfts?.data?.tokenId) }}>
+                                                        End
+                                                    </a> : <></>}
+                                                {account.data != nft?.nfts?.data?.owner && nft?.nfts?.data?.endAt > Date.now() && account.data != bidOwner ?
+                                                    <><a href="#"
+                                                        style={{ 'marginLeft': '30px' }}
+                                                        className="btn-main btn-lg"
+                                                        data-bs-toggle="modal" data-bs-target="#bidModal"
+                                                    >
+                                                        Bid
+                                                    </a>
+                                                        {renderModal(nft?.nfts?.bid, nft?.nfts?.data?.tokenId, price, setPrice, 'bidModal')}
+                                                    </> : <></>}
+                                                {account.data == nft?.nfts?.data?.owner
+                                                    ? !nft.nfts.data.isListed
+                                                        ? <>
+                                                            <a href="#"
+                                                                style={{ 'marginLeft': '30px' }}
+                                                                className="btn-main btn-lg btn-light"
+                                                                data-bs-toggle="modal" data-bs-target="#listModal"
+                                                            >
+                                                                List Nft
+                                                            </a>
+                                                            {renderModal(nft?.nfts?.listNft, nft?.nfts?.data?.tokenId, listPrice, setListPrice, 'listModal')}
+                                                        </>
+                                                        : <a href="#"
+                                                            style={{ 'marginLeft': '30px' }}
+                                                            className="btn-main btn-lg btn-light"
+                                                            onClick={() => { nft?.nfts?.unListNft(nft?.nfts?.data?.tokenId) }}>
+                                                            Un List Nft
+                                                        </a>
+                                                    : <></>
+                                                }
                                             </div>
                                         </div>
                                     </div>
