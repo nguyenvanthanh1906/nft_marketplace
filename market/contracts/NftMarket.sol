@@ -63,7 +63,7 @@ contract NftMarket is ERC721URIStorage, Ownable {
         require(msg.sender == owner, "not seller");
         require(isStarted == false, "started");
         _idToStarted[tokenId] = true;
-        _idToEndAt[tokenId] = time + 1000*100;
+        _idToEndAt[tokenId] = time + 100;
         _idToBidOwn[tokenId] = owner;
         _transfer(owner, address(this), tokenId);
     }

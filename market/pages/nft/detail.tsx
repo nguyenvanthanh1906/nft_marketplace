@@ -4,6 +4,7 @@ import { useGetNftItem } from '@hooks/web3';
 import { useRouter } from 'next/router'
 import React, { useEffect } from 'react';
 import { ChangeEvent, useState } from "react";
+import Countdown from 'react-countdown';
 
 // export const getServerSideProps: GetServerSideProps = async (context) => {
 
@@ -26,7 +27,7 @@ const NftDetail: NextPage = () => {
     const pid = router.query
     let nft = useGetNftItem(pid.tokenId);
     let transactions = nft?.nfts?.data?.transactions
-    let time = nft?.nfts?.data?.time
+    let endAt = nft?.nfts?.data?.endAt/1000
     const [price, setPrice] = useState("");
 
     const renderTransactions = () => {
@@ -80,7 +81,7 @@ const NftDetail: NextPage = () => {
                                     </div>
                                     <div className="col-md-6">
                                         <div className="item_info">
-                                            Auctions ends in {time.second}s
+                                            Auctions ends in <Countdown date={endAt} />
                                             <h2>{nft?.nfts?.data?.meta?.name}</h2>
                                             <div className="item_info_counts">
                                                 <div className="item_info_type"><i className="fa fa-image" />Art</div>

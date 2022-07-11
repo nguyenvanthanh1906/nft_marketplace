@@ -24,25 +24,12 @@ export const hookFactory: GetNftsItemHookFactory = ({ contract }) => (tokenId) =
             const coreNfts = await contract!.getNftItem(tokenId);
 
             let transactions = []
-            let time = {}
+            let endAt = 0
             try {
                 const topics = contract.filters.NftTransactions()
                 const events = await contract.queryFilter(topics);
-                const endAt = await contract.getEndAtById(tokenId)
-                const sub = Math.floor(parseInt(endAt) - Date.now());
-                let m;
-                let s;
-                if (sub > 0) {
-                    m = sub/1000/60
-                    s = sub/1000
-                } else {
-                    m = 0;
-                    s = 0;
-                }
-                time = {
-                    'minute': m,
-                    'second': s
-                }
+                endAt = await contract.getEndAtById(tokenId)
+                
                 for (let i = 0; i < events.length; i++) {
                     if (parseInt(events[i].args.tokenId) == tokenId) {
                         let transaction = {
@@ -70,7 +57,7 @@ export const hookFactory: GetNftsItemHookFactory = ({ contract }) => (tokenId) =
             nft.isListed = item.isListed
             nft.meta = meta
             nft.transactions = transactions
-            nft.time = time
+            nft.endAt = endAt
 
             return nft;
         }
