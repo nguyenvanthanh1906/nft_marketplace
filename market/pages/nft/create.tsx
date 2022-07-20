@@ -117,7 +117,11 @@ const NftCreate: NextPage = () => {
 
   const createNft = async () => {
     try {
-      const nftRes = await axios.get(nftURI);
+      const nftRes = await axios({
+        method: 'get',
+        url: nftURI,
+        withCredentials: false,
+      });
       const content = nftRes.data;
 
       Object.keys(content).forEach(key => {
@@ -258,7 +262,7 @@ const NftCreate: NextPage = () => {
                       id="uri"
                       className="form-control"
                       placeholder="URI"
-                      value={nftURI}
+                      defaultValue={nftURI}
                     />
                     <h5>Price</h5>
                     <input

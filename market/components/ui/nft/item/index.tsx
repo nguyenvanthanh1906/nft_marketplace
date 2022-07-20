@@ -3,10 +3,10 @@ import { NftMeta, Nft } from "../../../../types/nft";
 import Link from 'next/link'
 
 type NftItemProps = {
-    item: Nft;
-  };
+  item: Nft;
+};
 
-const NftItem: FunctionComponent<NftItemProps> = ({item}) => {
+const NftItem: FunctionComponent<NftItemProps> = ({ item }) => {
   return (
     <div className="d-item col-lg-3 col-md-6 col-sm-6 col-xs-12">
       <div className="nft__item">
@@ -50,7 +50,7 @@ const NftItem: FunctionComponent<NftItemProps> = ({item}) => {
               src={item.meta.image}
               className="lazy nft__item_preview"
               alt=""
-              style={{cursor: "pointer"}}
+              style={{ cursor: "pointer" }}
             />
           </Link>
         </div>
@@ -62,10 +62,12 @@ const NftItem: FunctionComponent<NftItemProps> = ({item}) => {
             <span />
           </div>
           <div className="nft__item_price">
-          {item.price} ETH<span>1/30</span>
+            {item.price} ETH
           </div>
           <div className="nft__item_action">
-            <a href="#">Place a bid</a>
+            <Link href={`/nft/detail?tokenId=${item.tokenId}`}>
+              <a href="#">View detail</a>
+            </Link>
           </div>
           <div className="nft__item_like">
             <i className="fa fa-heart" />

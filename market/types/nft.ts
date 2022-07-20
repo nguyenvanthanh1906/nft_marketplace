@@ -11,13 +11,18 @@ export type NftCore = {
     tokenId: number;
     price: number;
     creator: string;
-    isListed: boolean
+    isListed: boolean;
+    owner: string
 }
 
 export type Nft = {
     meta: NftMeta
     transactions: any[]
-    time: any
+    endAt: any
+    startPrice: any
+    highestPrice: any
+    highestBidder: any
+    bidOwner: any
 } & NftCore
 
 export type FileReq = {
