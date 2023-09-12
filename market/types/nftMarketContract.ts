@@ -89,6 +89,11 @@ export type NftMarketContractMethodNames =
   | 'transferFrom'
   | 'transferOwnership'
   | 'getEndAtById'
+  | 'getStartPriceById'
+  | 'getHighestPriceById'
+  | 'getHighestBidderById'
+  | 'getBidOwner'
+  | 'unListNft'
   | 'start'
   | 'bid'
   | 'end'
@@ -145,6 +150,8 @@ export interface NftitemResponse {
   2: string;
   isListed: boolean;
   3: boolean;
+  owner: string;
+  4: string;
 }
 export interface NftMarketContract {
   /**
@@ -356,15 +363,74 @@ export interface NftMarketContract {
   ): Promise<BigNumber>;
   /**
    * Payable: false
+   * Constant: true
+   * StateMutability: view
+   * Type: function
+   * @param tokenId Type: uint256, Indexed: false
+   */
+  getStartPriceById(
+    tokenId: BigNumberish,
+    overrides?: ContractCallOverrides
+  ): Promise<BigNumber>;
+  /**
+   * Payable: false
+   * Constant: true
+   * StateMutability: view
+   * Type: function
+   * @param tokenId Type: uint256, Indexed: false
+   */
+  getHighestPriceById(
+    tokenId: BigNumberish,
+    overrides?: ContractCallOverrides
+  ): Promise<BigNumber>;
+  /**
+   * Payable: false
+   * Constant: true
+   * StateMutability: view
+   * Type: function
+   * @param tokenId Type: uint256, Indexed: false
+   */
+  getHighestBidderById(
+    tokenId: BigNumberish,
+    overrides?: ContractCallOverrides
+  ): Promise<string>;
+  /**
+   * Payable: false
+   * Constant: true
+   * StateMutability: view
+   * Type: function
+   * @param tokenId Type: uint256, Indexed: false
+   */
+  getBidOwner(
+    tokenId: BigNumberish,
+    overrides?: ContractCallOverrides
+  ): Promise<string>;
+  /**
+   * Payable: false
+   * Constant: false
+   * StateMutability: nonpayable
+   * Type: function
+   * @param tokenId Type: uint256, Indexed: false
+   */
+  unListNft(
+    tokenId: BigNumberish,
+    overrides?: ContractTransactionOverrides
+  ): Promise<ContractTransaction>;
+  /**
+   * Payable: false
    * Constant: false
    * StateMutability: nonpayable
    * Type: function
    * @param tokenId Type: uint256, Indexed: false
    * @param time Type: uint256, Indexed: false
+   * @param startPrice Type: uint256, Indexed: false
+   * @param countDown Type: uint256, Indexed: false
    */
   start(
     tokenId: BigNumberish,
     time: BigNumberish,
+    startPrice: BigNumberish,
+    countDown: BigNumberish,
     overrides?: ContractTransactionOverrides
   ): Promise<ContractTransaction>;
   /**
